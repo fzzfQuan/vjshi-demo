@@ -1,6 +1,9 @@
 "use client";
 
-export default function CardIcon() {
+import { Drawer } from "../ui/drawer";
+import { Tabs } from "../ui/tabs";
+
+export function CardIcon() {
   return (
     <button className="relative group w-[3.25rem] h-[3.25rem] rounded-full flex items-center justify-center shadow-[0px_4px_10px_0px_rgba(0,0,0,0.3)] cursor-pointer p-px bg-white">
       <div className="flex w-full h-full items-center justify-center rounded-full group-hover:bg-neutral-50 transition-colors">
@@ -24,5 +27,65 @@ export default function CardIcon() {
         99
       </div>
     </button>
+  );
+}
+
+export function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="28" height="28">
+      <g
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <line x1="7" y1="7" x2="17" y2="17"></line>
+        <line x1="7" y1="17" x2="17" y2="7"></line>
+      </g>
+    </svg>
+  );
+}
+
+export function TabsList() {
+  return (
+    <Tabs defaultValue="tab1">
+      <Tabs.List>
+        <Tabs.Trigger value="tab1">标签1</Tabs.Trigger>
+        <Tabs.Trigger value="tab2">标签2</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="tab1">标签1内容</Tabs.Content>
+      <Tabs.Content value="tab2">标签2内容</Tabs.Content>
+    </Tabs>
+  );
+}
+
+export default function ShoppingCart() {
+  return (
+    <div className="flex items-center justify-center w-full h-full">
+      <Drawer.Root direction="right">
+        <Drawer.Trigger>
+          <CardIcon />
+        </Drawer.Trigger>
+
+        <Drawer.Portal>
+          <Drawer.Overlay />
+
+          <Drawer.Content className="max-w-lg w-full flex flex-col">
+            <header className="flex items-center justify-between text-black w-full font-medium text-2xl px-10 pt-9 pb-8">
+              <span>购物车</span>
+
+              <Drawer.Close>
+                <CloseIcon />
+              </Drawer.Close>
+            </header>
+
+            <div className="flex-1 flex flex-col">
+              <TabsList />
+            </div>
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+    </div>
   );
 }

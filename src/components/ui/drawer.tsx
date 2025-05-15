@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSpring, animated, config } from "@react-spring/web";
-import { DrawerPortal } from "./drawer-portal";
+
+import { createPortal } from "react-dom";
 
 // 抽屉组件的属性接口
 interface DrawerProps {
@@ -42,7 +43,6 @@ type DrawerContextType = {
   snapPoints: number[];
   activeSnapPoint: number | null;
   setActiveSnapPoint: (point: number | null) => void;
-
   contentRef: React.RefObject<HTMLDivElement | null>;
 };
 
@@ -56,12 +56,25 @@ const useDrawerContext = () => {
   return context;
 };
 
+const DrawerPortal = ({ children }: { children: React.ReactNode }) => {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(children, document.body);
+};
+
 // 抽屉根组件
 const DrawerRoot: React.FC<DrawerProps> = ({
   children,
   open: controlledOpen,
   onOpenChange,
-  direction = "bottom",
+  direction = "right",
   snapPoints = [1],
 }) => {
   const [open, setOpenState] = useState(controlledOpen || false);
@@ -133,15 +146,11 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
   children,
   className,
 }) => {
-  const {
-    open,
-    direction,
-    contentRef,
-  } = useDrawerContext();
+  const { open, direction, contentRef } = useDrawerContext();
 
   // 添加状态跟踪动画是否完成
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
-  
+
   // 使用react-spring来处理动画
   const getTransformValue = useCallback(() => {
     switch (direction) {
@@ -179,29 +188,27 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
         transform: getTransformValue(),
         immediate: false,
         onRest: () => {
-          // 动画完成后，设置动画完成状态为true
           setIsAnimationComplete(true);
         },
       });
     }
   }, [open, api, direction, getTransformValue]);
 
-  // 如果抽屉关闭且动画已完成，不渲染内容（完全从DOM中移除）
   if (!open && isAnimationComplete) return null;
 
   // 根据方向设置样式
   const getDirectionStyles = () => {
     switch (direction) {
       case "bottom":
-        return "fixed bottom-0 left-0 right-0 rounded-t-[10px]";
+        return "fixed bottom-0 left-0 right-0";
       case "top":
-        return "fixed top-0 left-0 right-0 rounded-b-[10px]";
+        return "fixed top-0 left-0 right-0";
       case "left":
-        return "fixed top-0 left-0 bottom-0 rounded-r-[10px]";
+        return "fixed top-0 left-0 bottom-0";
       case "right":
-        return "fixed top-0 right-0 bottom-0 rounded-l-[10px]";
+        return "fixed top-0 right-0 bottom-0";
       default:
-        return "fixed bottom-0 left-0 right-0 rounded-t-[10px]";
+        return "fixed bottom-0 left-0 right-0";
     }
   };
 
@@ -224,9 +231,6 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
 // 抽屉覆盖层组件
 const DrawerOverlay: React.FC<DrawerOverlayProps> = ({ className }) => {
   const { open, setOpen } = useDrawerContext();
-  
-  // 添加状态跟踪动画是否完成
-  const [isAnimationComplete, setIsAnimationComplete] = useState(false);
 
   // 使用react-spring处理覆盖层动画
   const [styles, api] = useSpring(() => ({
@@ -238,8 +242,6 @@ const DrawerOverlay: React.FC<DrawerOverlayProps> = ({ className }) => {
   // 当open状态变化时更新动画和动画完成状态
   useEffect(() => {
     if (open) {
-      // 覆盖层打开时，重置动画完成状态
-      setIsAnimationComplete(false);
       api.start({
         opacity: 1,
         immediate: false,
@@ -248,16 +250,12 @@ const DrawerOverlay: React.FC<DrawerOverlayProps> = ({ className }) => {
       api.start({
         opacity: 0,
         immediate: false,
-        onRest: () => {
-          // 动画完成后，设置动画完成状态为true
-          setIsAnimationComplete(true);
-        },
       });
     }
   }, [open, api]);
 
   // 如果覆盖层关闭且动画已完成，不渲染内容（完全从DOM中移除）
-  if (!open && isAnimationComplete) return null;
+  if (!open) return null;
 
   return (
     <animated.div
@@ -269,6 +267,31 @@ const DrawerOverlay: React.FC<DrawerOverlayProps> = ({ className }) => {
   );
 };
 
+// 抽屉关闭组件
+const DrawerClose: React.FC<{
+  className?: string;
+  children: React.ReactNode;
+}> = (props) => {
+  const { setOpen } = useDrawerContext();
+
+  // 处理点击事件，确保平滑过渡
+  const handleClose = React.useCallback(() => {
+    setOpen(false);
+  }, [setOpen]);
+
+  return (
+    <button
+      className={`${props.className} cursor-pointer`}
+      onClick={handleClose}
+      role="button"
+      tabIndex={0}
+      aria-label="Close"
+    >
+      {props.children}
+    </button>
+  );
+};
+
 // 抽屉组件导出
 export const Drawer = {
   Root: DrawerRoot,
@@ -276,4 +299,5 @@ export const Drawer = {
   Content: DrawerContent,
   Overlay: DrawerOverlay,
   Portal: DrawerPortal,
+  Close: DrawerClose,
 };
