@@ -249,7 +249,7 @@ export function CardForm({
             );
           })
         ) : (
-          <Empty title={`购物车${type === "fotos" ? "图片" : "视频"}为空`} />
+          <Empty />
         )}
       </div>
       <hr
