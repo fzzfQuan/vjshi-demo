@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/utils";
 import * as React from "react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -102,16 +103,55 @@ const TabsRoot: React.FC<TabsProps> = ({
 
 // Tabs列表组件
 const TabsList: React.FC<TabsListProps> = ({ children, className }) => {
-  const { orientation, dir } = useTabsContext();
+  const { orientation, dir, value } = useTabsContext();
+  const tabsRef = React.useRef<HTMLDivElement>(null);
+  const indicatorRef = React.useRef<HTMLDivElement>(null);
+  // 更新指示条位置
+  useEffect(() => {
+    if (tabsRef.current && indicatorRef.current) {
+      const activeTab = tabsRef.current.querySelector(`#tab-${value}`);
+      if (activeTab) {
+        const tabRect = activeTab.getBoundingClientRect();
+        const listRect = tabsRef.current.getBoundingClientRect();
+
+        // 计算指示条的位置和宽度
+        const left = tabRect.left - listRect.left;
+        const width = tabRect.width;
+
+        // 设置CSS变量
+        indicatorRef.current.style.setProperty(
+          "--tabs-indicator-x",
+          `${left}px`
+        );
+        indicatorRef.current.style.setProperty(
+          "--tabs-indicator-w",
+          `${width}px`
+        );
+      }
+    }
+  }, [value]);
 
   return (
     <div
+      ref={tabsRef}
       role="tablist"
       aria-orientation={orientation}
       dir={dir}
-      className={className}
+      className={cn(
+        "flex relative items-center border-b border-[#EDEDED] mx-10 justify-start",
+        className
+      )}
     >
       {children}
+
+      <div
+        ref={indicatorRef}
+        className="absolute bg-[#0D0D0D] bottom-0 left-0 pointer-events-none rounded h-[3px] transition-[transform,width] duration-300"
+        style={{
+          width: "var(--tabs-indicator-w)",
+          transform: "translateX(var(--tabs-indicator-x))",
+        }}
+      ></div>
     </div>
   );
 };
@@ -151,7 +191,13 @@ const TabsTrigger: React.FC<TabsTriggerProps> = ({
       aria-controls={`panel-${value}`}
       id={`tab-${value}`}
       tabIndex={isSelected ? 0 : -1}
-      className={className}
+      className={cn(
+        "transition-colors duration-300 flex items-center justify-center relative outline-none text-base px-1 py-4 font-medium ml-10 first:ml-0 text-[#888888] hover:text-[#0D0D0D] data-selected:text-black cursor-pointer disabled:cursor-not-allowed disabled:opacity-40 disabled:text-current pt-0 space-x-1",
+        {
+          "text-[#0D0D0D]": isSelected,
+        },
+        className
+      )}
       disabled={disabled}
       onClick={handleClick}
       onKeyDown={handleKeyDown}

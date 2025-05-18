@@ -146,7 +146,7 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
   children,
   className,
 }) => {
-  const { open, direction, contentRef } = useDrawerContext();
+  const { open, direction, contentRef, setOpen } = useDrawerContext();
 
   // 添加状态跟踪动画是否完成
   const [isAnimationComplete, setIsAnimationComplete] = useState(false);
@@ -174,6 +174,23 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
     immediate: !open,
   }));
 
+  // 添加ESC键盘事件监听器
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && open) {
+        setOpen(false);
+      }
+    };
+
+    // 添加事件监听器
+    document.addEventListener("keydown", handleKeyDown);
+
+    // 组件卸载时移除事件监听器
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, setOpen]);
+
   // 当open状态变化时更新动画和动画完成状态
   useEffect(() => {
     if (open) {
@@ -193,6 +210,7 @@ const DrawerContent: React.FC<DrawerContentProps> = ({
       });
     }
   }, [open, api, direction, getTransformValue]);
+
 
   if (!open && isAnimationComplete) return null;
 
