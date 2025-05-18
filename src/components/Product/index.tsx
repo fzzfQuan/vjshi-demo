@@ -121,6 +121,7 @@ export default function Product(props: Props) {
             onClick={(e) => {
               e.stopPropagation();
 
+              onChange([...value.filter((item) => item.id !== itemId)]);
               props.onRemove?.(props.type ?? "videos", itemId);
             }}
             className="appearance-none items-center justify-center select-none relative whitespace-nowrap transition duration-300 outline-none cursor-pointer disabled:cursor-not-allowed text-sm w-auto h-auto data-loading:text-transparent disabled:text-neutral-50 align-baseline border-0 text-[#0D0D0D]/80 hover:text-[#0D0D0D] hidden lg:block group-hover/item:block font-medium"

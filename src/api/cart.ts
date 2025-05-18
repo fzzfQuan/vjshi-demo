@@ -78,7 +78,7 @@ export async function deleteVideo(vid: number) {
 // 删除购物车中的音乐
 export async function deleteMusic(mid: number) {
   try {
-    const response = await fetch(`/vjh/buyer/cart/music?mid=${mid}`, {
+    const response = await fetch(`/vjm/cart/music/musics?mid=${mid}`, {
       method: "DELETE",
     });
 
@@ -115,10 +115,7 @@ export async function checkPurchasedVideo(
   }
 }
 
-
-export async function checkPurchasedFoto(
-  ids: number[]
-): Promise<FotoBougth[]> {
+export async function checkPurchasedFoto(ids: number[]): Promise<FotoBougth[]> {
   try {
     const searchParams = new URLSearchParams();
     ids.forEach((id) => searchParams.append("fids", id.toString()));
@@ -151,4 +148,3 @@ export async function checkPurchasedMusic(
     throw error;
   }
 }
-

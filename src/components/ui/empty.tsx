@@ -9,12 +9,7 @@ export default function Empty(props: { className?: string; title?: string }) {
       )}
     >
       <div>
-        <svg
-          viewBox="0 0 80 80"
-          width="24"
-          height="24"
-          className="w-20 h-20"
-        >
+        <svg viewBox="0 0 80 80" width="24" height="24" className="w-20 h-20">
           <rect width="80" height="80" fill="none" rx="0"></rect>
           <rect
             width="20"
@@ -46,7 +41,7 @@ export default function Empty(props: { className?: string; title?: string }) {
           ></path>
         </svg>
       </div>
-      <div className="text-lg font-medium pt-3">
+      <div className="text-base font-medium pt-3">
         {props.title ?? "暂无数据"}
       </div>
     </div>
